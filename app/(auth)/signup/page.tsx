@@ -6,20 +6,23 @@ import { Card } from "@/app/components/ui/Card";
 import { Input } from "@/app/components/ui/Input";
 import { useAuthStore } from '@/store/authStore';
 
-export default function Signin() {
+export default function Signup() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuthStore();
+  const [success, setSuccess] = useState(false);
+  const { register, isLoading } = useAuthStore();
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     setError('');
     try {
-      await login({ email, password });
-      router.push('/dashboard');
+      await register({ name, email, password });
+      setSuccess(true);
+      setTimeout(() => router.push('/signin'), 2000);
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Registration failed');
     }
   };
 
@@ -29,23 +32,30 @@ export default function Signin() {
       
       <Card className="w-full max-w-[420px] !p-8 z-10">
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-10 h-10 rounded-xl bg-accent-primary flex items-center justify-center font-bold text-lg mb-4">N</div>
-          <h2 className="text-xl font-bold tracking-tight text-text-primary">Welcome to Nexus Core</h2>
-          <p className="text-xs text-text-secondary mt-1">Authenticate to access your secure environment</p>
+          <h2 className="text-xl font-bold tracking-tight text-text-primary">Create Account</h2>
+          <p className="text-xs text-text-secondary mt-1">Join the secure environment</p>
         </div>
 
         {error && <p className="text-red-500 text-xs text-center mb-4">{error}</p>}
+        {success && <p className="text-green-500 text-xs text-center mb-4">Registration successful! Redirecting...</p>}
 
         <div className="flex flex-col gap-4">
           <Input 
-            label="Identity Gateway (Email)" 
+            label="Name" 
+            type="text" 
+            placeholder="Your Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)} 
+          />
+          <Input 
+            label="Email" 
             type="email" 
             placeholder="name@domain.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)} 
           />
           <Input 
-            label="Security Key (Password)" 
+            label="Password" 
             type="password" 
             placeholder="••••••••"
             value={password}
@@ -54,23 +64,11 @@ export default function Signin() {
           <Button 
             variant="primary" 
             className="w-full mt-2" 
-            onClick={handleLogin}
-            disabled={isLoading}
+            onClick={handleSignup}
+            disabled={isLoading || success}
           >
-            {isLoading ? 'Connecting...' : 'Initialize Connection'}
+            {isLoading ? 'Registering...' : 'Create Account'}
           </Button>
-        </div>
-...
-
-        <div className="relative flex py-5 items-center my-2">
-          <div className="flex-grow border-t border-white/8"></div>
-          <span className="flex-shrink mx-4 text-[10px] uppercase tracking-widest text-text-secondary/50 font-mono">OR TRANSLATE VIA</span>
-          <div className="flex-grow border-t border-white/8"></div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Button variant="secondary" className="!py-2.5 !text-xs">Google</Button>
-          <Button variant="secondary" className="!py-2.5 !text-xs">GitHub</Button>
         </div>
       </Card>
     </div>

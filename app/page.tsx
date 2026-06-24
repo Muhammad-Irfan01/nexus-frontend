@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
 
@@ -12,7 +13,14 @@ export default function LandingPage() {
         <div className="flex items-center gap-2 font-bold text-lg tracking-wider">
           <div className="w-6 h-6 rounded-md bg-accent-primary"></div> NEXUS
         </div>
-        <Button variant="secondary" className="!py-2 !px-4">Launch Core</Button>
+        <div className="flex items-center gap-3">
+          <Link href="/signin">
+            <Button variant="secondary" className="!py-2 !px-4">Sign In</Button>
+          </Link>
+          <Link href="/signup">
+            <Button variant="primary" className="!py-2 !px-4">Sign Up</Button>
+          </Link>
+        </div>
       </header>
 
       {/* Hero Section */}
