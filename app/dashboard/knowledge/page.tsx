@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { Database, Search, FolderPlus, FileText, HardDrive } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Database, Search, FolderPlus, FileText, HardDrive, Trash2, Upload } from "lucide-react";
 import { useDocumentStore } from "@/store/documentStore";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { Navbar } from "@/app/components/dashboard/Navbar";
@@ -10,8 +10,9 @@ import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 
 export default function KnowledgeBaseScreen() {
-  const { documents, fetchWorkspaceDocuments } = useDocumentStore();
+  const { documents, fetchWorkspaceDocuments, uploadDocument, deleteDocument, isLoading } = useDocumentStore();
   const { workspaces, getMyWorkspaces } = useWorkspaceStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getMyWorkspaces();
@@ -22,6 +23,13 @@ export default function KnowledgeBaseScreen() {
       fetchWorkspaceDocuments(workspaces[0].id);
     }
   }, [workspaces, fetchWorkspaceDocuments]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && workspaces.length > 0) {
+      await uploadDocument(workspaces[0].id, e.target.files[0]);
+      fetchWorkspaceDocuments(workspaces[0].id);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -48,15 +56,22 @@ export default function KnowledgeBaseScreen() {
             <Search className="absolute left-3 top-3.5 h-4 w-4 text-text-secondary/50" />
             <Input placeholder="Query indexed semantic tokens..." className="pl-10" />
           </div>
-          <Button variant="primary" className="w-full sm:w-auto text-xs gap-2">
-            <FolderPlus className="w-4 h-4" /> Create Collection
+          <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
+          <Button variant="primary" className="w-full sm:w-auto text-xs gap-2" onClick={() => fileInputRef.current?.click()} disabled={isLoading}>
+            <Upload className="w-4 h-4" /> Upload Document
           </Button>
         </div>
 
         {/* Collections Matrix Directory */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {documents.map((doc, idx) => (
-            <Card key={doc.id || idx} className="hover:border-white/20 transition-all cursor-pointer group">
+            <Card key={doc.id || idx} className="hover:border-white/20 transition-all cursor-pointer group relative">
+              <button 
+                className="absolute top-4 right-4 p-2 bg-white/5 rounded-lg text-system-error opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => deleteDocument(doc.id)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
               <div className="flex justify-between items-start mb-6">
                 <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover:border-accent-primary/40 transition-colors">
                   <Database className="w-5 h-5 text-accent-highlight" />
