@@ -1,16 +1,79 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Navbar } from "../components/dashboard/Navbar";
 import { Card } from "../components/ui/Card";
-
+import { useAuthStore } from "@/store/authStore";
+import { useWorkspaceStore } from "@/store/workspaceStore";
+import { useChatStore } from "@/store/chatStore";
 
 export default function DashboardPage() {
+  const { user } = useAuthStore();
+  const { workspaces, getMyWorkspaces, createWorkspace } = useWorkspaceStore();
+  const { conversations, getConversations } = useChatStore();
+  const [activeWorkspace, setActiveWorkspace] = useState<any>(null);
+  const [initLoading, setInitLoading] = useState(true);
+
+  // Initialize workspaces and retrieve active workspace context
+  useEffect(() => {
+    const initWorkspace = async () => {
+      setInitLoading(true);
+      try {
+        await getMyWorkspaces();
+      } catch (err) {
+        console.error("Failed to load workspaces:", err);
+      } finally {
+        setInitLoading(false);
+      }
+    };
+    initWorkspace();
+  }, [getMyWorkspaces]);
+
+  // Handle auto-bootstrapping a workspace if none exist, or picking the first one
+  useEffect(() => {
+    if (initLoading) return;
+
+    const manageWorkspaces = async () => {
+      if (workspaces.length === 0) {
+        try {
+          const defaultWorkspace = await createWorkspace({
+            name: "Default Workspace",
+            description: "Primary working cluster",
+          });
+          setActiveWorkspace(defaultWorkspace);
+        } catch (err) {
+          console.error("Failed to bootstrap default workspace:", err);
+        }
+      } else {
+        setActiveWorkspace(workspaces[0]);
+      }
+    };
+    manageWorkspaces();
+  }, [workspaces, initLoading, createWorkspace]);
+
+  // Once active workspace is known, fetch its conversational threads
+  useEffect(() => {
+    if (activeWorkspace?.id) {
+      getConversations(activeWorkspace.id);
+    }
+  }, [activeWorkspace, getConversations]);
+
   return (
     <div className="flex-1 flex flex-col">
       <Navbar title="Core Command Workspace" />
       
       <div className="p-8 max-w-7xl w-full mx-auto flex flex-col gap-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1">Welcome back, Operator</h2>
-          <p className="text-xs text-text-secondary">System cluster operations healthy. All pipelines operational.</p>
+          <h2 className="text-2xl font-bold tracking-tight mb-1">
+            Welcome back, {user?.name || "Operator"}
+          </h2>
+          <p className="text-xs text-text-secondary">
+            System cluster operations healthy. All pipelines operational for active node{" "}
+            <span className="text-accent-highlight font-mono font-bold">
+              [{activeWorkspace?.name || "Initializing..."}]
+            </span>
+          </p>
         </div>
 
         {/* Stats Strip */}
@@ -31,22 +94,40 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Area List */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <h3 className="text-xs font-mono font-bold tracking-widest text-text-secondary uppercase">Recent Conversational Threads</h3>
+            <h3 className="text-xs font-mono font-bold tracking-widest text-text-secondary uppercase">
+              Recent Conversational Threads
+            </h3>
             <Card className="!p-0">
               <div className="divide-y divide-white/8">
-                {[
-                  { title: "Optimization loops on backend execution handlers", model: "Nexus-Omni", time: "12m ago" },
-                  { title: "Vector map integration architecture analysis", model: "Deep-Research-v4", time: "2h ago" },
-                  { title: "Financial analysis balance parsing matrices", model: "Claude-3.5", time: "1d ago" },
-                ].map((row, idx) => (
-                  <div key={idx} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-                    <div className="flex flex-col gap-1 max-w-[70%]">
-                      <span className="text-sm font-medium text-text-primary truncate">{row.title}</span>
-                      <span className="text-[10px] font-mono text-text-secondary">{row.model}</span>
-                    </div>
-                    <span className="text-xs text-text-secondary/60">{row.time}</span>
+                {conversations.length > 0 ? (
+                  conversations.slice(0, 5).map((convo, idx) => (
+                    <Link
+                      key={convo.id}
+                      href={`/dashboard/chat?id=${convo.id}`}
+                      className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors block"
+                    >
+                      <div className="flex flex-col gap-1 max-w-[70%]">
+                        <span className="text-sm font-medium text-text-primary truncate block">
+                          {convo.title}
+                        </span>
+                        <span className="text-[10px] font-mono text-text-secondary">
+                          Conversation ID: {convo.id.slice(0, 8)}...
+                        </span>
+                      </div>
+                      <span className="text-xs text-text-secondary/60">
+                        {new Date(convo.updatedAt || convo.createdAt).toLocaleDateString()}
+                      </span>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-xs text-text-secondary">
+                    No active conversational threads in this workspace.{" "}
+                    <Link href="/dashboard/chat" className="text-accent-primary hover:underline font-semibold">
+                      Start one now
+                    </Link>
+                    .
                   </div>
-                ))}
+                )}
               </div>
             </Card>
           </div>

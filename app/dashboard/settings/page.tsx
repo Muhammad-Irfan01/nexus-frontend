@@ -1,10 +1,33 @@
+"use client";
 
+import { useEffect, useState } from "react";
+import { Key, ShieldCheck, User, CreditCard } from "lucide-react";
+import { useUserStore } from "@/store/userStore";
 import { Navbar } from "@/app/components/dashboard/Navbar";
-import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
-import { Key, ShieldCheck, User, CreditCard, Bell } from "lucide-react";
+import { Input } from "@/app/components/ui/Input";
+import { Button } from "@/app/components/ui/Button";
 
 export default function SettingsScreen() {
+  const { profile, fetchProfile, updateProfile, isLoading } = useUserStore();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.firstName || '');
+      setLastName(profile.lastName || '');
+    }
+  }, [profile]);
+
+  const handleUpdateProfile = async () => {
+    await updateProfile({ firstName, lastName });
+  };
+
   return (
     <div className="flex-1 flex flex-col">
       <Navbar title="System Settings & Token Control" />
@@ -14,8 +37,8 @@ export default function SettingsScreen() {
         {/* Inner Tab Control Column Layout */}
         <div className="flex flex-col gap-1">
           {[
-            { name: "User Profile", icon: User, active: false },
-            { name: "Cryptographic Keys", icon: Key, active: true },
+            { name: "User Profile", icon: User, active: true },
+            { name: "Cryptographic Keys", icon: Key, active: false },
             { name: "Access Protocols", icon: ShieldCheck, active: false },
             { name: "Billing Framework", icon: CreditCard, active: false },
           ].map((tab, i) => (
@@ -36,39 +59,33 @@ export default function SettingsScreen() {
         {/* Right Active Worksurface Panel Workspace */}
         <div className="md:col-span-3 flex flex-col gap-6">
           <div>
-            <h3 className="text-base font-semibold text-text-primary mb-1">Developer Credentials</h3>
-            <p className="text-xs text-text-secondary">Inject authorization variables below to bypass sandboxes via localized API parameters.</p>
+            <h3 className="text-base font-semibold text-text-primary mb-1">User Profile</h3>
+            <p className="text-xs text-text-secondary">Update your profile information below.</p>
           </div>
 
           <Card className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-mono font-medium text-text-secondary tracking-wider uppercase">Active Key Ring</label>
-              <div className="flex gap-4 items-center">
-                <div className="flex-1 bg-bg-primary font-mono text-xs text-text-secondary border border-white/8 rounded-lg px-4 py-3 tracking-widest">
-                  nx_live_••••••••••••••••••••4921
-                </div>
-                <Button variant="secondary" className="!py-3 !px-4 text-xs">Reveal</Button>
-              </div>
-            </div>
-
-            <hr className="border-white/5" />
-
-            <div className="flex flex-col gap-4">
-              <h4 className="text-xs font-semibold text-text-primary uppercase tracking-wider">Access Scope Parameters</h4>
-              <div className="flex items-center justify-between p-3 bg-white/[0.01] border border-white/5 rounded-xl">
-                <div>
-                  <p className="text-xs font-medium text-text-primary">Restrict Read Vector Access Only</p>
-                  <p className="text-[10px] text-text-secondary">Prevents mutating cluster vectors over third party APIs.</p>
-                </div>
-                <div className="w-8 h-4 bg-accent-primary rounded-full relative p-0.5 cursor-pointer">
-                  <div className="w-3 h-3 bg-white rounded-full ml-auto"></div>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input 
+                label="First Name" 
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <Input 
+                label="Last Name" 
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
             </div>
             
             <div className="flex justify-end gap-3 mt-4">
-              <Button variant="ghost" className="text-xs">Cancel</Button>
-              <Button variant="primary" className="text-xs">Commit Token Updates</Button>
+              <Button 
+                variant="primary" 
+                className="text-xs" 
+                onClick={handleUpdateProfile}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Updating...' : 'Commit Profile Updates'}
+              </Button>
             </div>
           </Card>
         </div>

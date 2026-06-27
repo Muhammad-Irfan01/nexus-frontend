@@ -1,11 +1,28 @@
+"use client";
 
+import { useEffect } from "react";
+import { Database, Search, FolderPlus, FileText, HardDrive } from "lucide-react";
+import { useDocumentStore } from "@/store/documentStore";
+import { useWorkspaceStore } from "@/store/workspaceStore";
 import { Navbar } from "@/app/components/dashboard/Navbar";
+import { Input } from "@/app/components/ui/Input";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
-import { Input } from "@/app/components/ui/Input";
-import { Database, Search, FolderPlus, FileText, Share2, HardDrive } from "lucide-react";
 
 export default function KnowledgeBaseScreen() {
+  const { documents, fetchWorkspaceDocuments } = useDocumentStore();
+  const { workspaces, getMyWorkspaces } = useWorkspaceStore();
+
+  useEffect(() => {
+    getMyWorkspaces();
+  }, [getMyWorkspaces]);
+
+  useEffect(() => {
+    if (workspaces.length > 0) {
+      fetchWorkspaceDocuments(workspaces[0].id);
+    }
+  }, [workspaces, fetchWorkspaceDocuments]);
+
   return (
     <div className="flex-1 flex flex-col">
       <Navbar title="Vector Knowledge Repository" />
@@ -21,7 +38,7 @@ export default function KnowledgeBaseScreen() {
             </p>
           </div>
           <span className="text-[10px] font-mono bg-system-success/20 text-system-success px-2 py-0.5 rounded">
-            99.98% Index Fidelity
+            {documents.length} Documents Indexed
           </span>
         </div>
 
@@ -38,24 +55,17 @@ export default function KnowledgeBaseScreen() {
 
         {/* Collections Matrix Directory */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { name: "Q3 Financial Audits", docs: 24, size: "142 MB", type: "PDF/XLSX" },
-            { name: "Core Product Specifications", docs: 89, size: "12 MB", type: "Markdown" },
-            { name: "Customer Behavioral Vectors", docs: 142, size: "1.2 GB", type: "JSON Strings" },
-          ].map((col, idx) => (
-            <Card key={idx} className="hover:border-white/20 transition-all cursor-pointer group">
+          {documents.map((doc, idx) => (
+            <Card key={doc.id || idx} className="hover:border-white/20 transition-all cursor-pointer group">
               <div className="flex justify-between items-start mb-6">
                 <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover:border-accent-primary/40 transition-colors">
                   <Database className="w-5 h-5 text-accent-highlight" />
                 </div>
-                <span className="text-[10px] font-mono text-text-secondary/40 bg-white/5 px-2 py-0.5 rounded">
-                  {col.type}
-                </span>
               </div>
-              <h3 className="text-base font-semibold text-text-primary mb-2">{col.name}</h3>
+              <h3 className="text-base font-semibold text-text-primary mb-2 truncate">{doc.name || 'Untitled Document'}</h3>
               <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-xs text-text-secondary">
-                <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> {col.docs} units</span>
-                <span className="flex items-center gap-1"><HardDrive className="w-3.5 h-3.5" /> {col.size}</span>
+                <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> ID: {doc.id.slice(0, 8)}</span>
+                <span className="flex items-center gap-1"><HardDrive className="w-3.5 h-3.5" /> Status: {doc.status || 'Processed'}</span>
               </div>
             </Card>
           ))}
