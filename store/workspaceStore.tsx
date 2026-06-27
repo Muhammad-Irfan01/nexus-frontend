@@ -21,6 +21,11 @@ interface WorkspaceState {
   getWorkspaceById: (id: string) => Promise<any>;
   updateWorkspace: (id: string, dto: UpdateWorkspaceDto) => Promise<any>;
   deleteWorkspace: (id: string) => Promise<void>;
+  inviteMember: (workspaceId: string, email: string) => Promise<void>;
+  updateMemberRole: (workspaceId: string, memberId: string, role: string) => Promise<void>;
+  removeMember: (workspaceId: string, memberId: string) => Promise<void>;
+  getWorkspaceSetting: (workspaceId: string) => Promise<any>;
+  updateWorkspaceSetting: (workspaceId: string, dto: any) => Promise<any>;
 }
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
@@ -119,5 +124,39 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
       });
       throw error;
     }
+  },
+
+  inviteMember: async (workspaceId, email) => {
+    await apiClient(`workspace/${workspaceId}/invite`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    toast.success('Invitation sent');
+  },
+
+  updateMemberRole: async (workspaceId, memberId, role) => {
+    await apiClient(`workspace/${workspaceId}/members/${memberId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    });
+    toast.success('Role updated');
+  },
+
+  removeMember: async (workspaceId, memberId) => {
+    await apiClient(`workspace/${workspaceId}/members/${memberId}`, {
+      method: 'DELETE',
+    });
+    toast.success('Member removed');
+  },
+
+  getWorkspaceSetting: async (workspaceId) => {
+    return await apiClient<any>(`workspace/${workspaceId}/settings`);
+  },
+
+  updateWorkspaceSetting: async (workspaceId, dto) => {
+    return await apiClient<any>(`workspace/${workspaceId}/settings`, {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
+    });
   },
 }));
