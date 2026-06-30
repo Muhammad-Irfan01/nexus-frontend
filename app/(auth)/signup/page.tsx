@@ -7,7 +7,8 @@ import { Input } from "@/app/components/ui/Input";
 import { useAuthStore } from '@/store/authStore';
 
 export default function Signup() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,7 +19,7 @@ export default function Signup() {
   const handleSignup = async () => {
     setError('');
     try {
-      await register({ name, email, password });
+      await register({ firstName, lastName, email, password });
       setSuccess(true);
       setTimeout(() => router.push('/signin'), 2000);
     } catch (err: any) {
@@ -27,6 +28,7 @@ export default function Signup() {
   };
 
   return (
+    // ...
     <div className="w-screen h-screen bg-bg-primary flex items-center justify-center relative px-4">
       <div className="ambient-glow top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-60"></div>
       
@@ -41,13 +43,20 @@ export default function Signup() {
 
         <div className="flex flex-col gap-4">
           <Input 
-            label="Name" 
+            label="First Name" 
             type="text" 
-            placeholder="Your Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)} 
+            placeholder="First Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)} 
           />
           <Input 
+            label="Last Name" 
+            type="text" 
+            placeholder="Last Name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)} 
+          />
+         <Input 
             label="Email" 
             type="email" 
             placeholder="name@domain.com"
@@ -74,3 +83,4 @@ export default function Signup() {
     </div>
   );
 }
+    // ...

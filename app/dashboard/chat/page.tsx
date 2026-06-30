@@ -25,7 +25,7 @@ export default function ChatScreen() {
 
   const handleSendMessage = async () => {
     if (!activeConversationId || !message) return;
-    await sendMessage(activeConversationId, { content: message });
+    await sendMessage(activeConversationId, { message });
     setMessage('');
   };
 

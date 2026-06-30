@@ -9,7 +9,7 @@ export interface CreateConversationDto {
 }
 
 export interface SendMessageDto {
-  content: string;
+  message: string;
 }
 
 interface ChatState {
