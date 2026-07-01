@@ -39,6 +39,7 @@ export default function DashboardPage() {
         try {
           const defaultWorkspace = await createWorkspace({
             name: "Default Workspace",
+            slug: "default" as string,
             description: "Primary working cluster",
           });
           setActiveWorkspace(defaultWorkspace);

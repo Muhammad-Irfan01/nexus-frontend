@@ -5,6 +5,7 @@ import { CheckCircle2, AlertTriangle } from "lucide-react";
 
 export interface CreateWorkspaceDto {
   name: string;
+  slug: string;
   description?: string;
 }
 

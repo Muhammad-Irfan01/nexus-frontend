@@ -51,11 +51,11 @@ export const useChatStore = create<ChatState>((set) => ({
   getConversations: async (workspaceId) => {
     set({ isLoading: true });
     try {
-      const conversations = await apiClient<any[]>(`chat/conversations?workspaceId=${workspaceId}`);
+      const conversations = await apiClient<any[]>(`chat/workspace/${workspaceId}/conversations`);
       set({ conversations, isLoading: false });
     } catch (error) {
       set({ isLoading: false, conversations: [] });
-      toast.error('Failed to load conversations');
+      toast.error('Failed to load conversations'); 
     }
   },
 
