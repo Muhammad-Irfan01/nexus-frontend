@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Briefcase, Plus, Trash2, Edit2, X, Sparkles } from "lucide-react";
+import { Briefcase, Plus, Trash2, Edit2, X, Sparkles, UserPlus } from "lucide-react";
 import { Navbar } from "@/app/components/dashboard/Navbar";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
@@ -10,10 +10,13 @@ import { useWorkspaceStore } from "@/store/workspaceStore";
 
 export default function WorkspacesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [editingWorkspace, setEditingWorkspace] = useState<any>(null);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<any>(null);
   const [formData, setFormData] = useState({ name: "", slug: "", description: "" });
+  const [inviteEmail, setInviteEmail] = useState("");
 
-  const { workspaces, getMyWorkspaces, createWorkspace, updateWorkspace, deleteWorkspace } = useWorkspaceStore();
+  const { workspaces, getMyWorkspaces, createWorkspace, updateWorkspace, deleteWorkspace, inviteMember } = useWorkspaceStore();
 
   useEffect(() => {
     getMyWorkspaces();
@@ -31,6 +34,12 @@ export default function WorkspacesPage() {
     setIsModalOpen(true);
   };
 
+  const openInviteModal = (workspace: any) => {
+    setSelectedWorkspace(workspace);
+    setInviteEmail("");
+    setIsInviteModalOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingWorkspace) {
@@ -42,12 +51,20 @@ export default function WorkspacesPage() {
     getMyWorkspaces(); // Refresh list
   };
 
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedWorkspace) {
+      await inviteMember(selectedWorkspace.workspace.id, inviteEmail);
+      setIsInviteModalOpen(false);
+    }
+  };
+
   const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete workspace "${name}"?`)) {
         await deleteWorkspace(id);
     }
   };
-console.log(workspaces)
+
   return (
     <div className="flex-1 flex flex-col">
       <Navbar title="Workspace Management" />
@@ -83,6 +100,9 @@ console.log(workspaces)
               </div>
 
               <div className="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-white/5">
+                <Button variant="ghost" onClick={() => openInviteModal(ws)} className="!p-2 text-text-secondary hover:text-text-primary">
+                  <UserPlus className="w-3.5 h-3.5" />
+                </Button>
                 <Button variant="ghost" onClick={() => openUpdateModal(ws)} className="!p-2 text-text-secondary hover:text-text-primary">
                   <Edit2 className="w-3.5 h-3.5" />
                 </Button>
@@ -133,6 +153,35 @@ console.log(workspaces)
               <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
                 <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="text-xs">Abort</Button>
                 <Button type="submit" variant="primary" className="text-xs">Save Workspace</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isInviteModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-sm glass-card glass-glow-border rounded-nexus p-6 relative">
+            <button onClick={() => setIsInviteModalOpen(false)} className="absolute right-4 top-4 text-text-secondary hover:text-text-primary">
+              <X className="w-4 h-4" />
+            </button>
+            <h3 className="text-base font-bold tracking-tight mb-4 flex items-center gap-2">
+              <UserPlus className="w-4 h-4 text-accent-primary" /> 
+              Invite Member
+            </h3>
+
+            <form onSubmit={handleInvite} className="flex flex-col gap-4">
+              <Input 
+                label="Email Address" 
+                type="email"
+                value={inviteEmail} 
+                onChange={(e) => setInviteEmail(e.target.value)} 
+                required 
+              />
+
+              <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
+                <Button type="button" variant="ghost" onClick={() => setIsInviteModalOpen(false)} className="text-xs">Abort</Button>
+                <Button type="submit" variant="primary" className="text-xs">Send Invite</Button>
               </div>
             </form>
           </div>
