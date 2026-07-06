@@ -9,6 +9,7 @@ interface DocumentState {
   uploadDocument: (workspaceId: string, file: File) => Promise<void>;
   fetchWorkspaceDocuments: (workspaceId: string) => Promise<void>;
   deleteDocument: (documentId: string) => Promise<void>;
+  retryProcessing: (documentId: string) => Promise<void>;
 }
 
 export const useDocumentStore = create<DocumentState>((set) => ({
@@ -68,6 +69,22 @@ export const useDocumentStore = create<DocumentState>((set) => ({
         icon: <AlertTriangle className="w-4 h-4 text-system-error" />,
       });
       throw error;
+    }
+  },
+
+  retryProcessing: async (documentId) => {
+    const promise = apiClient<any>(`documents/${documentId}/retry`, { method: 'POST' });
+    
+    toast.promise(promise, {
+      loading: 'Retrying processing...',
+      success: 'Reprocessing started.',
+      error: 'Failed to retry processing.',
+    });
+
+    try {
+        await promise;
+    } catch (error) {
+        throw error;
     }
   },
 }));

@@ -27,9 +27,12 @@ export const useChatStore = create<ChatState>((set) => ({
 
   createConversation: async (dto) => {
     set({ isLoading: true });
-    const promise = apiClient<any>('chat/conversations', {
+    // Remove workspaceId from the body as it's passed in the URL
+    const { workspaceId, ...body } = dto;
+    
+    const promise = apiClient<any>(`chat/workspace/${workspaceId}/conversations`, {
       method: 'POST',
-      body: JSON.stringify(dto),
+      body: JSON.stringify(body),
     });
 
     toast.promise(promise, {
