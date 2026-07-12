@@ -20,14 +20,14 @@ export default function KnowledgeBaseScreen() {
 
   useEffect(() => {
     if (workspaces.length > 0) {
-      fetchWorkspaceDocuments(workspaces[0].id);
+      fetchWorkspaceDocuments(workspaces[0].workspace.id);
     }
   }, [workspaces, fetchWorkspaceDocuments]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && workspaces.length > 0) {
       await uploadDocument(workspaces[0].id, e.target.files[0]);
-      fetchWorkspaceDocuments(workspaces[0].id);
+      fetchWorkspaceDocuments(workspaces[0].workspace.id);
     }
   };
 

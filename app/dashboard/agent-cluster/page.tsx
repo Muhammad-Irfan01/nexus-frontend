@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Bot, Terminal, Plus, Trash2, Sliders, X, Sparkles } from "lucide-react";
+import { useWorkspaceStore } from "@/store/workspaceStore";
 import { Navbar } from "@/app/components/dashboard/Navbar";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
@@ -13,14 +14,21 @@ export default function AgentsClusterPage() {
   const [editingAgent, setEditingAgent] = useState<any>(null);
 
   const { agents, fetchAgents, createAgent, updateAgent, deleteAgent } = useAgentStore();
+    const { workspaces, getMyWorkspaces } = useWorkspaceStore();
 
   // Form States
   const [formData, setFormData] = useState({ name: "", type: "Deep Research", systemPrompt: "" });
 
+ useEffect(() => {
+    getMyWorkspaces();
+  }, [getMyWorkspaces]);
+
   useEffect(() => {
-    // GET /agents/workspace/:workspaceId
-    fetchAgents("default-workspace").catch(() => toast.error("Error linking configuration stream."));
-  }, [fetchAgents]);
+    if (workspaces.length > 0) {
+      // GET /agents/workspace/:workspaceId
+      fetchAgents(workspaces[0].workspace.id).catch(() => toast.error("Error linking configuration stream."));
+    }
+  }, [workspaces, fetchAgents]);
 
   const openCreateModal = () => {
     setEditingAgent(null);
@@ -44,6 +52,10 @@ export default function AgentsClusterPage() {
         error: "Failed to alter configuration mapping."
       });
     } else {
+      if (workspaces.length === 0) {
+       toast.error("No workspace selected.");
+       return;
+      }
       // POST /agents/workspace/:workspaceId
       toast.promise(createAgent("default-workspace", formData), {
         loading: "Spawning isolated cluster sub-agent...",

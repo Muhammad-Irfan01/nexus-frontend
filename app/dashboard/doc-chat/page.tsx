@@ -38,6 +38,10 @@ export default function DocumentChatScreen() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+  console.log('DEBUG documents:', documents.map(d => ({ id: d.id, name: d.originalName, status: d.status })));
+}, [documents]);
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && workspaces.length > 0) {
       toast.info('Document extraction started...');
@@ -106,6 +110,23 @@ export default function DocumentChatScreen() {
             />
             <Button variant="ghost" onClick={() => fileInputRef.current?.click()} className="text-xs gap-2">
               <Upload className="w-3.5 h-3.5" /> Upload
+            </Button>
+            <Button variant="ghost" onClick={async () => {
+                try {
+                    const response = await fetch('http://localhost:3001/documents/chunks', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}` // Corrected token key
+                        }
+                    });
+                    const data = await response.json();
+                    console.log('Document Chunks:', data);
+                    toast.success('Chunks logged to console!');
+                } catch (error) {
+                    toast.error('Failed to fetch chunks.');
+                    console.error(error);
+                }
+            }} className="text-xs gap-2">
+              Debug Chunks
             </Button>
           </div>
           <div className="flex flex-col gap-4">

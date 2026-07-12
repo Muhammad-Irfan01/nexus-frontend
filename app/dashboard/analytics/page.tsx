@@ -18,7 +18,7 @@ export default function AnalyticsScreen() {
 
   useEffect(() => {
     if (workspaces.length > 0) {
-      fetchAnalytics(workspaces[0].id);
+     fetchAnalytics(workspaces[0].workspace.id);
     }
   }, [workspaces, fetchAnalytics]);
 

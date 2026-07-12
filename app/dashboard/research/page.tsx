@@ -22,7 +22,7 @@ export default function ResearchAgentScreen() {
   const handleResearch = async () => {
     if (workspaces.length === 0 || !question) return;
     try {
-        const response = await askQuestion(workspaces[0].id, question);
+        const response = await askQuestion(workspaces[0].workspace.id, question);
         setAnswer(response.answer || JSON.stringify(response));
     } catch (err) {
         setAnswer('Failed to get answer.');

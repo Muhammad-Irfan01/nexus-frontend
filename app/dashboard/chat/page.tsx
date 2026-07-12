@@ -19,7 +19,7 @@ export default function ChatScreen() {
 
   useEffect(() => {
     if (workspaces.length > 0) {
-      getConversations(workspaces[0].id);
+     getConversations(workspaces[0].workspace.id);
     }
   }, [workspaces, getConversations]);
 
