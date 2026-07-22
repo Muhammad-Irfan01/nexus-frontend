@@ -4,23 +4,34 @@ import { useEffect, useState } from "react";
 import { Key, ShieldCheck, User, CreditCard } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
 import { useBillingStore } from "@/store/billingStore";
+import { useCryptoStore } from "@/store/cryptoStore";
+import { useWorkspaceStore } from "@/store/workspaceStore";
 import { Navbar } from "@/app/components/dashboard/Navbar";
 import { Card } from "@/app/components/ui/Card";
 import { Input } from "@/app/components/ui/Input";
 import { Button } from "@/app/components/ui/Button";
+import { CryptoKeys } from "@/app/components/dashboard/settings/CryptoKeys";
+import { AccessProtocols } from "@/app/components/dashboard/settings/AccessProtocols";
 
 export default function SettingsScreen() {
   const { profile, fetchProfile, updateProfile, isLoading: isUserLoading } = useUserStore();
   const { subscription, fetchSubscription, createPortalSession, isLoading: isBillingLoading } = useBillingStore();
+  const { fetchCryptoData } = useCryptoStore();
+  const { workspaces, getMyWorkspaces } = useWorkspaceStore();
   const [activeTab, setActiveTab] = useState("User Profile");
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
   useEffect(() => {
     fetchProfile();
-    // Assuming workspaceId is needed, but for simplicity we fetch generally if needed, 
-    // or we might need it from a context provider. For now, skipping workspaceId dependency.
-  }, [fetchProfile]);
+    getMyWorkspaces();
+  }, [fetchProfile, getMyWorkspaces]);
+
+  useEffect(() => {
+    if (workspaces.length > 0) {
+        fetchCryptoData(workspaces[0].workspace.id);
+    }
+  }, [workspaces, fetchCryptoData]);
 
   useEffect(() => {
     if (profile) {
@@ -34,13 +45,15 @@ export default function SettingsScreen() {
   };
 
   const handleOpenPortal = async () => {
-    // Assuming workspaceId is available, if not, this needs fixing.
-    // For this prototype, using a mock workspaceId
-    const url = await createPortalSession('mock-workspace-id');
-    window.open(url, '_blank');
+    if (workspaces.length > 0) {
+        const url = await createPortalSession(workspaces[0].workspace.id);
+        window.open(url, '_blank');
+    }
   };
 
   const renderContent = () => {
+    const activeWorkspaceId = workspaces.length > 0 ? workspaces[0].workspace.id : '';
+
     switch (activeTab) {
       case "User Profile":
         return (
@@ -74,6 +87,26 @@ export default function SettingsScreen() {
                 </Button>
               </div>
             </Card>
+          </div>
+        );
+      case "Cryptographic Keys":
+        return (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="text-base font-semibold text-text-primary mb-1">Cryptographic Keys</h3>
+              <p className="text-xs text-text-secondary">Manage your API keys.</p>
+            </div>
+            <CryptoKeys workspaceId={activeWorkspaceId} />
+          </div>
+        );
+      case "Access Protocols":
+        return (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="text-base font-semibold text-text-primary mb-1">Access Protocols</h3>
+              <p className="text-xs text-text-secondary">Manage your access protocols.</p>
+            </div>
+            <AccessProtocols workspaceId={activeWorkspaceId} />
           </div>
         );
       case "Billing Framework":

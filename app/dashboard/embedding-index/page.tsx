@@ -7,15 +7,25 @@ import { Card } from "@/app/components/ui/Card";
 import { Button } from "@/app/components/ui/Button";
 import { useDocumentStore } from "@/store/documentStore";
 import { useEmbeddingStore } from "@/store/embeddingStore";
+import { useWorkspaceStore } from "@/store/workspaceStore";
 
 export default function EmbeddingsPage() {
   const { documents, fetchWorkspaceDocuments } = useDocumentStore();
   const { generateEmbeddings, retryEmbeddings } = useEmbeddingStore();
+  const { workspaces, getMyWorkspaces } = useWorkspaceStore();
 
   useEffect(() => {
-    // GET /documents/:workspaceId linked through store initializer
-    fetchWorkspaceDocuments("default-workspace").catch(() => toast.error("Failed to parse resource gateway."));
-  }, [fetchWorkspaceDocuments]);
+    getMyWorkspaces();
+  }, [getMyWorkspaces]);
+
+  useEffect(() => {
+    if (workspaces.length > 0) {
+      // Use the first workspace as default if no selection logic exists
+      fetchWorkspaceDocuments(workspaces[0].workspace.id).catch(() => 
+        toast.error("Failed to fetch documents for this workspace.")
+      );
+    }
+  }, [workspaces, fetchWorkspaceDocuments]);
 
   const handleGenerate = async (id: string, name: string) => {
     // POST /embeddings/document/:id/generate

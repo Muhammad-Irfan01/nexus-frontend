@@ -60,7 +60,9 @@ export default function Signin() {
             {isLoading ? 'Connecting...' : 'Initialize Connection'}
           </Button>
         </div>
-...
+        <div>
+          <p className="text-xs text-text-secondary mt-4">Don't have an account? <a href="/signup" className="text-accent-primary">Sign up</a></p>
+        </div>
 
         <div className="relative flex py-5 items-center my-2">
           <div className="flex-grow border-t border-white/8"></div>

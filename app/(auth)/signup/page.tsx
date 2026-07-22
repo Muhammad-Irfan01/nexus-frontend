@@ -79,8 +79,10 @@ export default function Signup() {
             {isLoading ? 'Registering...' : 'Create Account'}
           </Button>
         </div>
+        <div>
+          <p className="text-xs text-text-secondary mt-4">Already have an account? <a href="/signin" className="text-accent-primary">Sign in</a></p>
+        </div>
       </Card>
     </div>
   );
 }
-    // ...
