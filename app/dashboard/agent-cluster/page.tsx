@@ -14,12 +14,12 @@ export default function AgentsClusterPage() {
   const [editingAgent, setEditingAgent] = useState<any>(null);
 
   const { agents, fetchAgents, createAgent, updateAgent, deleteAgent } = useAgentStore();
-    const { workspaces, getMyWorkspaces } = useWorkspaceStore();
+  const { workspaces, getMyWorkspaces } = useWorkspaceStore();
 
   // Form States
   const [formData, setFormData] = useState({ name: "", type: "Deep Research", systemPrompt: "" });
 
- useEffect(() => {
+  useEffect(() => {
     getMyWorkspaces();
   }, [getMyWorkspaces]);
 
@@ -53,15 +53,16 @@ export default function AgentsClusterPage() {
       });
     } else {
       if (workspaces.length === 0) {
-       toast.error("No workspace selected.");
-       return;
+        toast.error("No workspace selected.");
+        return;
       }
       // POST /agents/workspace/:workspaceId
-      toast.promise(createAgent("default-workspace", formData), {
+      toast.promise(createAgent(workspaces[0].workspace.id, formData), {
         loading: "Spawning isolated cluster sub-agent...",
         success: "Agent node initialized successfully.",
         error: "Workspace rejected spawning request."
       });
+      fetchAgents(workspaces[0].workspace.id).catch(() => toast.error("Error linking configuration stream."));
     }
     setIsModalOpen(false);
   };
@@ -73,6 +74,7 @@ export default function AgentsClusterPage() {
       success: "Sub-node terminated and memory wiped safely.",
       error: "Node termination sequence locked."
     });
+    fetchAgents(workspaces[0].workspace.id).catch(() => toast.error("Error linking configuration stream."));
   };
 
   return (
@@ -137,33 +139,35 @@ export default function AgentsClusterPage() {
               <X className="w-4 h-4" />
             </button>
             <h3 className="text-base font-bold tracking-tight mb-4 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-accent-highlight" /> 
+              <Sparkles className="w-4 h-4 text-accent-highlight" />
               {editingAgent ? "Alter Node Manifest" : "Configure Cluster Deployment Instance"}
             </h3>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <Input 
-                label="Agent Identity Call Sign" 
-                value={formData.name} 
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                placeholder="e.g. Compliance-Inspector" 
-                required 
+              <Input
+                label="Agent Identity Call Sign"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g. Compliance-Inspector"
+                required
               />
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">System Node Type</label>
-                <select 
-                  value={formData.type} 
+                <select
+                  value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   className="w-full bg-bg-primary text-text-primary border border-white/8 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-accent-primary/50"
                 >
-                  <option>Deep Research</option>
-                  <option>Code Analysis</option>
-                  <option>Document Synthesis</option>
+                  <option value="GENERAL">General</option>
+                  <option value="SUPPORT">Support</option>
+                  <option value="SALES">Sales</option>
+                  <option value="HR">HR</option>
+                  <option value="CUSTOM">Custom</option>
                 </select>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-medium text-text-secondary uppercase tracking-wider">Core System Directive Prompt</label>
-                <textarea 
+                <textarea
                   value={formData.systemPrompt}
                   onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
                   rows={4}

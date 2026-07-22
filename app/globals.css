@@ -75,4 +75,25 @@ body {
     pointer-events: none;
     z-index: 0;
   }
+  .scroller-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+
+  .scroller-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scroller-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scroller-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+  }
+
+  .scroller-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.28);
+  }
 }

@@ -7,10 +7,10 @@ import { LogOut } from 'lucide-react';
 
 const menuItems = [
   { name: 'Dashboard', path: '/dashboard', icon: '📊' },
-  { name: 'AI Chat', path: '/dashboard/chat', icon: '💬' },
-  { name: 'Research Agent', path: '/dashboard/research', icon: '⚡' },
+  // { name: 'AI Chat', path: '/dashboard/chat', icon: '💬' },
+  // { name: 'Research Agent', path: '/dashboard/research', icon: '⚡' },
   { name: 'Embeddings Index', path: '/dashboard/embedding-index', icon: '🧠' },
-  { name: 'Agent Cluster', path: '/dashboard/agent-cluster', icon: '🤖' },
+  // { name: 'Agent Cluster', path: '/dashboard/agent-cluster', icon: '🤖' },
   { name: 'Workspaces', path: '/dashboard/workspaces', icon: '🏢' },
   { name: 'Knowledge Base', path: '/dashboard/knowledge', icon: '🗄️' },
   { name: 'Document Chat', path: '/dashboard/doc-chat', icon: '📄' },

@@ -26,7 +26,7 @@ export default function KnowledgeBaseScreen() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && workspaces.length > 0) {
-      await uploadDocument(workspaces[0].id, e.target.files[0]);
+      await uploadDocument(workspaces[0].workspace.id, e.target.files[0]);
       fetchWorkspaceDocuments(workspaces[0].workspace.id);
     }
   };

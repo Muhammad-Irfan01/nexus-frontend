@@ -7,9 +7,10 @@ import { Card } from "@/app/components/ui/Card";
 import { Layers, Activity, TrendingUp, Cpu } from "lucide-react";
 import { useAnalyticsStore } from "@/store/analyticsStore";
 import { useWorkspaceStore } from "@/store/workspaceStore";
+import { UsageChart } from "@/app/components/ui/UsageChart";
 
 export default function AnalyticsScreen() {
-  const { overview, fetchAnalytics, isLoading } = useAnalyticsStore();
+  const { overview, usageOverTime, fetchAnalytics, isLoading } = useAnalyticsStore();
   const { workspaces, getMyWorkspaces } = useWorkspaceStore();
 
   useEffect(() => {
@@ -19,6 +20,12 @@ export default function AnalyticsScreen() {
   useEffect(() => {
     if (workspaces.length > 0) {
      fetchAnalytics(workspaces[0].workspace.id);
+     
+     const interval = setInterval(() => {
+        fetchAnalytics(workspaces[0].workspace.id);
+     }, 30000); // Poll every 30 seconds
+     
+     return () => clearInterval(interval);
     }
   }, [workspaces, fetchAnalytics]);
 
@@ -47,7 +54,13 @@ export default function AnalyticsScreen() {
             </Card>
           ))}
         </div>
-        {/* ... Rest of the page ... */}
+
+        {/* Usage Over Time Chart */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-text-primary mb-4">Usage Trends (Last 30 Days)</h2>
+          <UsageChart data={usageOverTime} />
+        </Card>
+        
       </div>
     </div>
   );
